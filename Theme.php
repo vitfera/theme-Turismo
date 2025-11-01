@@ -241,6 +241,16 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
         });
 
         parent::_init();
+        
+        // Hooks de template para adicionar campos turísticos
+        $app->hook("template(space.edit.main-mc-card):begin", function(){
+            $this->part('turismo/campos-especificos');
+        });
+        
+        // Hook para adicionar indicadores de campos obrigatórios
+        $app->hook("template(space.edit.entity-info):end", function(){
+            $this->part('turismo/campos-obrigatorios');
+        });
     }
 
     function register() {

@@ -121,11 +121,24 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
 
         // Desabilitar oportunidades nas consultas da API
         $app->hook('ApiQuery(Opportunity).where', function(&$where) use ($app) {
-            $where .= " AND FALSE"; // Nunca retorna oportunidades
+            $where .= " AND e.id IS NULL"; // Nunca retorna oportunidades
         });
 
         // Remove tipos não turísticos da interface
         $app->hook('mapas.printJsObject:before', function() use ($app) {
+            // Desabilitar oportunidades na interface
+            if(isset($this->jsObject['enabledEntities']['opportunities'])) {
+                $this->jsObject['enabledEntities']['opportunities'] = false;
+            }
+            if(isset($this->jsObject['global']['enabledEntities']['opportunities'])) {
+                $this->jsObject['global']['enabledEntities']['opportunities'] = false;
+            }
+            
+            // Remove o componente home-opportunities da página inicial
+            if(isset($this->jsObject['home']['opportunities'])) {
+                unset($this->jsObject['home']['opportunities']);
+            }
+            
             // Alterar labels da taxonomia "area" para "Segmento Turístico"
             if(isset($this->jsObject['taxonomyTerms']['area'])) {
                 $this->jsObject['taxonomyTerms']['area']['name'] = 'Segmento Turístico';

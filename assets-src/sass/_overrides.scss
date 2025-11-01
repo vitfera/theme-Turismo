@@ -1,14 +1,6 @@
-/* Estilos específicos do tema Turismo */
+/* ===== TURISMO THEME OVERRIDES ===== */
 
-/* Customizações específicas para o setor de turismo */
-.turismo-highlight {
-    background-color: var(--mc-primary-500);
-    color: white;
-    padding: 1rem;
-    border-radius: 8px;
-}
-
-/* Cores específicas do turismo */
+/* CSS Custom Properties para cores do turismo */
 :root {
     --turismo-natural: #4CAF50;
     --turismo-cultural: #FF9800;
@@ -16,4 +8,138 @@
     --turismo-religioso: #9C27B0;
     --turismo-aventura: #2196F3;
     --turismo-rural: #8BC34A;
+    --turismo-nautico: #00BCD4;
+}
+
+/* Logo customizações */
+.main-footer .theme-logo.onlyImg .theme-logo__logo--img img {
+    max-height: 5rem;
+    @media (min-width: 800px) {
+        margin-bottom: 4rem;
+    }
+}
+
+.mc-header-logo {
+    width: 146.14px;
+}
+
+/* Ocultar menu de oportunidades */
+.mc-header-menu--item.opportunity {
+    display: none;
+}
+
+/* Customizar menu de atrativos (spaces) */
+.mc-header-menu--item.space {
+    .icon {
+        background-color: var(--mc-spaces-500);
+    }
+    .label {
+        color: var(--mc-spaces-500);
+    }
+}
+
+/* Customizar menu de roteiros (projects) */
+.mc-header-menu--item.project {
+    .icon {
+        background-color: var(--mc-projects-500);
+    }
+    .label {
+        color: var(--mc-projects-500);
+    }
+}
+
+/* Remover botões desnecessários na busca */
+.controller-search {
+    .search__header--content--right {
+        button.opportunity {
+            display: none;
+        }
+    }
+}
+
+/* Estilos para formulários de cadastro turístico */
+.turismo-form {
+    .form-group {
+        margin-bottom: 1.5rem;
+        
+        label {
+            font-weight: 600;
+            color: var(--mc-gray-700);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .required {
+            color: var(--mc-danger-500);
+        }
+    }
+    
+    .campo-turismo {
+        background-color: var(--mc-gray-50);
+        border: 2px solid var(--mc-gray-200);
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: border-color 0.3s ease;
+        
+        &:focus {
+            border-color: var(--turismo-natural);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+    }
+}
+
+/* Cards de entidades turísticas */
+.entity-card {
+    &.turismo {
+        border-left: 4px solid var(--turismo-natural);
+        
+        &.cultural {
+            border-left-color: var(--turismo-cultural);
+        }
+        
+        &.aventura {
+            border-left-color: var(--turismo-aventura);
+        }
+        
+        &.gastronomico {
+            border-left-color: var(--turismo-gastronomico);
+        }
+        
+        &.religioso {
+            border-left-color: var(--turismo-religioso);
+        }
+        
+        &.rural {
+            border-left-color: var(--turismo-rural);
+        }
+        
+        &.nautico {
+            border-left-color: var(--turismo-nautico);
+        }
+    }
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    .turismo-card {
+        margin-bottom: 1rem;
+    }
+    
+    .turismo-badge {
+        font-size: 0.75rem;
+        padding: 2px 8px;
+    }
+    
+    .header-turismo {
+        .header-actions {
+            flex-direction: column;
+            align-items: center;
+            
+            .action-button {
+                width: 200px;
+                text-align: center;
+            }
+        }
+    }
 }

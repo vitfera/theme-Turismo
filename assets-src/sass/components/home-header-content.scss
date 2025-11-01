@@ -1,0 +1,102 @@
+@use '../../../../BaseV2/assets-src/sass/0.settings/mixins' as *;
+
+.home-header-content {
+    .header-turismo {
+        background: linear-gradient(135deg, var(--turismo-natural) 0%, var(--turismo-aventura) 50%, var(--turismo-cultural) 100%);
+        padding: size(80) 0;
+        text-align: center;
+        color: white;
+        
+        .header-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: size(16);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            
+            @media (max-width: 768px) {
+                font-size: 2rem;
+            }
+        }
+        
+        .header-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: size(32);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            
+            @media (max-width: 768px) {
+                font-size: 1.1rem;
+                padding: 0 size(20);
+            }
+        }
+        
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: size(20);
+            flex-wrap: wrap;
+            
+            .action-button {
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid white;
+                color: white;
+                padding: size(14) size(28);
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                
+                &:hover {
+                    background: white;
+                    color: var(--turismo-natural);
+                    transform: translateY(-2px);
+                }
+                
+                &.primary {
+                    background: white;
+                    color: var(--turismo-natural);
+                    
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.9);
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Seção de estatísticas na home
+.home-stats {
+    background: var(--mc-gray-100);
+    padding: size(60) 0;
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: size(40);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 size(20);
+    }
+    
+    .stat-item {
+        text-align: center;
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--turismo-natural);
+            margin-bottom: size(8);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--mc-gray-600);
+            font-weight: 500;
+        }
+    }
+}

@@ -1,0 +1,67 @@
+@use '../../../../BaseV2/assets-src/sass/0.settings/mixins' as *;
+
+.layout-entity {
+    .fullwidth {
+        grid-column: span 2;
+    }
+
+    &.action-single {
+        .tab-component {
+            &.info,
+            &.about,
+            &.gallery,
+            &.management {
+                .grid-12 {
+                    gap: size(40) size(24);
+                }
+            }
+        } 
+    }
+}
+
+// Estilos específicos para atrativos turísticos
+.entity-space {
+    &.turismo-atrativo {
+        .entity-header {
+            background: linear-gradient(135deg, var(--turismo-natural) 0%, var(--turismo-aventura) 100%);
+        }
+    }
+}
+
+// Estilos específicos para roteiros turísticos  
+.entity-project {
+    &.turismo-roteiro {
+        .entity-header {
+            background: linear-gradient(135deg, var(--turismo-cultural) 0%, var(--turismo-rural) 100%);
+        }
+    }
+}
+
+// Cards de atrativos e roteiros
+.turismo-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+}
+
+// Badges para tipos de turismo
+.turismo-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    
+    &--natural { background-color: var(--turismo-natural); color: white; }
+    &--cultural { background-color: var(--turismo-cultural); color: white; }
+    &--gastronomico { background-color: var(--turismo-gastronomico); color: white; }
+    &--religioso { background-color: var(--turismo-religioso); color: white; }
+    &--aventura { background-color: var(--turismo-aventura); color: white; }
+    &--rural { background-color: var(--turismo-rural); color: white; }
+    &--nautico { background-color: var(--turismo-nautico); color: white; }
+}

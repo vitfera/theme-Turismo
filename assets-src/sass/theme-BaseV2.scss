@@ -1,0 +1,57 @@
+@use 'sass:color';
+
+// COLORS
+$black: #1E1E1E;
+$error: #FF2D2D;
+$gray-100: #F5F5F5;
+$gray-300: #C4C4C4;
+$gray-700: #4E4E4E;
+$warning: #F07B07;
+$white: #FFFFFF;
+
+// Default lightness deltas
+$lightness-300: 25%;
+$lightness-700: 25%;
+
+// Brand colors - Turismo
+$primary-500: #4CAF50;    // Verde turismo/natureza
+$secondary-500: #FF9800;  // Laranja cultura/aventura
+
+// Entities colors
+$opportunities-500: #2BA100;
+$events-500: #FF5722;     // Vermelho eventos turísticos
+$agents-500: #FF6400;
+$projects-500: #2196F3;   // Azul roteiros
+$spaces-500: #4CAF50;     // Verde atrativos
+
+$seals-500: #1E1E1E;
+
+// Feedback colors
+$danger-500: #EF1010;
+$success-500: #498200;
+$warning-500: #FF9F1C;
+$helper-500: #0074C1;
+
+// Cores específicas do turismo
+$turismo-natural: #4CAF50;
+$turismo-cultural: #FF9800;
+$turismo-gastronomico: #F44336;
+$turismo-religioso: #9C27B0;
+$turismo-aventura: #2196F3;
+$turismo-rural: #8BC34A;
+$turismo-nautico: #00BCD4;
+
+// home
+$home-opportunities: #FFA4A3;
+$home-feature: #93DC79;
+$home-register: #0074C1;
+
+// PAGES
+@import 'layouts/turismo.scss';
+
+// Components
+@import '../../../BaseV2/assets-src/sass/theme-BaseV2';
+
+@import 'components/home-spaces';
+@import 'components/home-header-content';
+@import 'overrides';

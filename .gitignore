@@ -1,0 +1,22 @@
+# Arquivos a serem ignorados
+
+# PRD (Product Requirements Document)
+PRD_theme-Turismo.md
+
+# Node modules (caso sejam adicionados futuramente)
+node_modules/
+
+# Logs
+*.log
+
+# Cache e build
+.cache/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -91,22 +91,9 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
         ];
 
         /*
-         * Modifica a consulta da API de espaços para só retornar Atrativos Turísticos
+         * Filtros de API para mostrar apenas tipos turísticos são tratados via hooks ApiQuery.params
+         * Os hooks where abaixo foram substituídos pelos hooks params para melhor compatibilidade
          */
-        $app->hook('ApiQuery(Space).where', function(&$where) use ($app) {
-            $where .= "
-                AND (e._type BETWEEN 80 AND 89)
-            ";
-        });
-
-        /*
-         * Modifica a consulta da API de projetos para só retornar Roteiros Turísticos
-         */
-        $app->hook('ApiQuery(Project).where', function(&$where) use ($app) {
-            $where .= "
-                AND (e._type BETWEEN 80 AND 89)
-            ";
-        });
 
         // Ajusta pseudo query para identificar a tela de busca de atrativos
         $app->hook('search-spaces-initial-pseudo-query', function(&$initial_pseudo_query){
@@ -116,6 +103,22 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
         // Ajusta pseudo query para identificar a tela de busca de roteiros
         $app->hook('search-projects-initial-pseudo-query', function(&$initial_pseudo_query){
             $initial_pseudo_query['@turismo'] = 1;
+        });
+
+        // Evita que seja carregado outros tipos na tela de busca de atrativos
+        $app->hook('ApiQuery(Space).params', function(&$params){
+            if(($params['@turismo'] ?? false) && empty($params['type'])) {
+                $params['type'] = "BET(80,89)";
+                unset($params['@turismo']);
+            }
+        });
+
+        // Evita que seja carregado outros tipos na tela de busca de roteiros
+        $app->hook('ApiQuery(Project).params', function(&$params){
+            if(($params['@turismo'] ?? false) && empty($params['type'])) {
+                $params['type'] = "BET(80,89)";
+                unset($params['@turismo']);
+            }
         });
 
         // Desabilitar oportunidades nas consultas da API

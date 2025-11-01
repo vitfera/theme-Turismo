@@ -1,12 +1,14 @@
 <?php
 
 return [
+    // Entidades habilitadas no tema Turismo
     'app.enabled.agents'        => true,
+    'app.enabled.spaces'        => true,
     'app.enabled.projects'      => true,
     'app.enabled.events'        => true,
     'app.enabled.apps'          => false,
     'app.enabled.seals'         => true,
-    'app.enabled.opportunities' => false,
+    'app.enabled.opportunities' => false,  // Completamente desabilitadas
     
     // Configurações específicas do tema Turismo
     'turismo.ownerAgentId'      => null, // Definir conforme necessário

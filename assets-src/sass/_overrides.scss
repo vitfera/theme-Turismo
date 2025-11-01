@@ -1,0 +1,19 @@
+/* Estilos específicos do tema Turismo */
+
+/* Customizações específicas para o setor de turismo */
+.turismo-highlight {
+    background-color: var(--mc-primary-500);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* Cores específicas do turismo */
+:root {
+    --turismo-natural: #4CAF50;
+    --turismo-cultural: #FF9800;
+    --turismo-gastronomico: #F44336;
+    --turismo-religioso: #9C27B0;
+    --turismo-aventura: #2196F3;
+    --turismo-rural: #8BC34A;
+}

@@ -29,7 +29,18 @@ $this->dict = [
     'cat' => 'Centro de atendimento ao turista (CAT)',
     'equipamento-de-apoio' => 'Equipamento de apoio',
     
-    // Segmentos turísticos
+    // Taxonomias customizadas para turismo
+    'Área de Atuação' => 'Segmento Turístico',
+    'Área de atuação' => 'Segmento Turístico',
+    'área de atuação' => 'segmento turístico',
+    'Áreas de atuação' => 'Segmentos Turísticos',
+    'áreas de atuação' => 'segmentos turísticos',
+    'Selecione pelo menos uma área' => 'Selecione pelo menos um segmento turístico',
+    'Selecione as áreas' => 'Selecione os segmentos turísticos',
+    'Você deve informar ao menos uma área de atuação' => 'Você deve informar ao menos um segmento turístico',
+    'txt_area' => 'Segmento Turístico',
+    
+    // Novos segmentos turísticos
     'turismo-cultural' => 'Turismo cultural',
     'ecoturismo' => 'Ecoturismo',
     'turismo-de-experiencia' => 'Turismo de experiência',

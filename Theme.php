@@ -14,6 +14,64 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
         $app = App::i();
         $self = $this;
 
+        // Desabilitar oportunidades no tema Turismo
+        $app->config['app.enabled.opportunities'] = false;
+
+        // Registrar tipos de espaços turísticos PRIMEIRO
+        $app->hook('mapas.config(space-types)', function(&$config) {
+            // Limpar tipos existentes e adicionar apenas os turísticos
+            $config = [];
+            
+            // Usar as configurações do conf-base.php
+            $turismo_space_types = [
+                80 => 'Atrativo Natural',
+                81 => 'Atrativo Cultural/Histórico',
+                82 => 'Atrativo Religioso',
+                83 => 'Atrativo Gastronômico',
+                84 => 'Atrativo Rural',
+                85 => 'Esporte e Aventura',
+                86 => 'Centro de Atendimento ao Turista',
+                87 => 'Equipamento de Apoio'
+            ];
+            
+            $items = [];
+            foreach($turismo_space_types as $id => $name) {
+                $items[$id] = ['name' => \MapasCulturais\i::__($name)];
+            }
+            
+            $config[\MapasCulturais\i::__('Atrativos')] = [
+                'range' => [80, 89],
+                'items' => $items
+            ];
+        });
+
+        // Registrar tipos de projetos turísticos PRIMEIRO
+        $app->hook('mapas.config(project-types)', function(&$config) {
+            // Limpar tipos existentes e adicionar apenas os turísticos
+            $config = [];
+            
+            // Usar as configurações do conf-base.php
+            $turismo_project_types = [
+                80 => 'Roteiro Cultural',
+                81 => 'Roteiro Ecológico',
+                82 => 'Roteiro Gastronômico',
+                83 => 'Roteiro Religioso',
+                84 => 'Roteiro de Aventura',
+                85 => 'Roteiro Rural',
+                86 => 'Roteiro Náutico'
+            ];
+            
+            $items = [];
+            foreach($turismo_project_types as $id => $name) {
+                $items[$id] = ['name' => \MapasCulturais\i::__($name)];
+            }
+            
+            $config[\MapasCulturais\i::__('Roteiros')] = [
+                'range' => [80, 89],
+                'items' => $items
+            ];
+        });
+
         // Campos obrigatórios para Atrativos Turísticos (Spaces)
         $requiredSpaceFields = [
             'endereco',
@@ -24,16 +82,13 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
             'En_Municipio', 
             'En_Estado',
             'turismo_horario_funcionamento',
-            'turismo_contato',
-            'turismo_tipo_atrativo',
-            'turismo_segmento_turistico'
+            'turismo_contato'
         ];
 
         // Campos obrigatórios para Roteiros Turísticos (Projects)
         $requiredProjectFields = [
             'turismo_duracao_estimada',
-            'turismo_ponto_partida',
-            'turismo_categoria_roteiro'
+            'turismo_ponto_partida'
         ];
 
         /*
@@ -59,62 +114,65 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
             $initial_pseudo_query['@turismo'] = 1;
         });
 
-        // Evita que sejam carregados outros tipos na tela de busca de atrativos
-        $app->hook('ApiQuery(Space).params', function(&$params){
-            if(($params['@turismo'] ?? false) && empty($params['type'])) {
-                $params['type'] = "BET(80,89)";
-                unset($params['@turismo']);
-            }
-        });
-
         // Ajusta pseudo query para identificar a tela de busca de roteiros
         $app->hook('search-projects-initial-pseudo-query', function(&$initial_pseudo_query){
             $initial_pseudo_query['@turismo'] = 1;
         });
 
-        // Evita que sejam carregados outros tipos na tela de busca de roteiros
-        $app->hook('ApiQuery(Project).params', function(&$params){
-            if(($params['@turismo'] ?? false) && empty($params['type'])) {
-                $params['type'] = "BET(80,89)";
-                unset($params['@turismo']);
-            }
+        // Desabilitar oportunidades nas consultas da API
+        $app->hook('ApiQuery(Opportunity).where', function(&$where) use ($app) {
+            $where .= " AND FALSE"; // Nunca retorna oportunidades
         });
 
         // Remove tipos não turísticos da interface
         $app->hook('mapas.printJsObject:before', function() use ($app) {
-            // Para espaços - só mostrar tipos de atrativos turísticos
-            $space_options = $this->jsObject['EntitiesDescription']['space']['type']['options'];
-            $space_options_order = $this->jsObject['EntitiesDescription']['space']['type']['optionsOrder'];
-
-            $new_space_options = [];
-            foreach($space_options as $id => $value) {
-                if($id >= 80 && $id <= 89) {
-                    $new_space_options[$id] = $value;
-                }
+            // Alterar labels da taxonomia "area" para "Segmento Turístico"
+            if(isset($this->jsObject['taxonomyTerms']['area'])) {
+                $this->jsObject['taxonomyTerms']['area']['name'] = 'Segmento Turístico';
             }
-
-            $space_options_order = array_filter($space_options_order, fn($id) => $id >= 80 && $id <= 89);
-
-            $this->jsObject['EntitiesDescription']['space']['type']['options'] = $new_space_options;
-            $this->jsObject['EntitiesDescription']['space']['type']['optionsOrder'] = $space_options_order;
-
-            // Para projetos - só mostrar tipos de roteiros turísticos
-            $project_options = $this->jsObject['EntitiesDescription']['project']['type']['options'];
-            $project_options_order = $this->jsObject['EntitiesDescription']['project']['type']['optionsOrder'];
-
-            $new_project_options = [];
-            foreach($project_options as $id => $value) {
-                if($id >= 80 && $id <= 89) {
-                    $new_project_options[$id] = $value;
-                }
+            
+            // Remover oportunidades completamente da interface
+            if(isset($this->jsObject['EntitiesDescription']['opportunity'])) {
+                unset($this->jsObject['EntitiesDescription']['opportunity']);
             }
-
-            $project_options_order = array_filter($project_options_order, fn($id) => $id >= 80 && $id <= 89);
-
-            $this->jsObject['EntitiesDescription']['project']['type']['options'] = $new_project_options;
-            $this->jsObject['EntitiesDescription']['project']['type']['optionsOrder'] = $project_options_order;
+            
+            // Filtrar apenas tipos turísticos para espaços (80-87)
+            if(isset($this->jsObject['EntitiesDescription']['space']['type']['options'])) {
+                $space_options = $this->jsObject['EntitiesDescription']['space']['type']['options'];
+                $new_space_options = [];
+                $new_space_order = [];
+                
+                for($i = 80; $i <= 87; $i++) {
+                    if(isset($space_options[$i])) {
+                        $new_space_options[$i] = $space_options[$i];
+                        $new_space_order[] = $i;
+                    }
+                }
+                
+                $this->jsObject['EntitiesDescription']['space']['type']['options'] = $new_space_options;
+                $this->jsObject['EntitiesDescription']['space']['type']['optionsOrder'] = $new_space_order;
+            }
+            
+            // Filtrar apenas tipos turísticos para projetos (80-86)
+            if(isset($this->jsObject['EntitiesDescription']['project']['type']['options'])) {
+                $project_options = $this->jsObject['EntitiesDescription']['project']['type']['options'];
+                $new_project_options = [];
+                $new_project_order = [];
+                
+                for($i = 80; $i <= 86; $i++) {
+                    if(isset($project_options[$i])) {
+                        $new_project_options[$i] = $project_options[$i];
+                        $new_project_order[] = $i;
+                    }
+                }
+                
+                $this->jsObject['EntitiesDescription']['project']['type']['options'] = $new_project_options;
+                $this->jsObject['EntitiesDescription']['project']['type']['optionsOrder'] = $new_project_order;
+            }
 
         }, 1000);
+
+        parent::_init();
 
         // Validação de campos obrigatórios para Spaces
         $app->hook('GET(space.edit):before', function () use($self, $requiredSpaceFields) {
@@ -169,148 +227,66 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
             }
         });
 
-        parent::_init();
+        // Substituir a taxonomia "área de atuação" pelos segmentos turísticos
+        $segmentos_turisticos = [
+            'Turismo Cultural',
+            'Ecoturismo', 
+            'Turismo de Aventura',
+            'Turismo Rural',
+            'Turismo Gastronômico',
+            'Turismo Religioso',
+            'Turismo Náutico',
+            'Turismo de Eventos',
+            'Turismo de Negócios',
+            'Turismo de Saúde e Bem-estar',
+            'Turismo Pedagógico',
+            'Turismo Social',
+            'Observação de Fauna',
+            'Pesca Esportiva',
+            'Mergulho',
+            'Trilhas e Caminhadas',
+            'Rapel e Escalada',
+            'Esportes Aquáticos',
+            'Ciclismo',
+            'Turismo Fotográfico'
+        ];
 
-        // Registrar tipos de espaços turísticos
-        $app->hook('mapas.config(space-types)', function(&$config) {
-            $config[\MapasCulturais\i::__('Atrativos')] = [
-                'range' => [80, 89],
-                'items' => [
-                    80 => ['name' => \MapasCulturais\i::__('Atrativo Natural')],
-                    81 => ['name' => \MapasCulturais\i::__('Atrativo Cultural/Histórico')],
-                    82 => ['name' => \MapasCulturais\i::__('Atrativo Religioso/Fé')],
-                    83 => ['name' => \MapasCulturais\i::__('Atrativo Gastronômico')],
-                    84 => ['name' => \MapasCulturais\i::__('Atrativo Rural/Vivência')],
-                    85 => ['name' => \MapasCulturais\i::__('Esporte e Aventura')],
-                    86 => ['name' => \MapasCulturais\i::__('Centro de Atendimento ao Turista')],
-                    87 => ['name' => \MapasCulturais\i::__('Equipamento de Apoio')],
-                ]
-            ];
-        });
+        // Sobrescrever a taxonomia "area" (ID 1) com os segmentos turísticos
+        $taxo_area_turismo = new \MapasCulturais\Definitions\Taxonomy(
+            1, 
+            'area', 
+            'Segmento Turístico', 
+            $segmentos_turisticos, 
+            false, 
+            true
+        );
+        $app->registerTaxonomy('MapasCulturais\Entities\Space', $taxo_area_turismo);
 
-        // Registrar tipos de projetos turísticos (roteiros)
-        $app->hook('mapas.config(project-types)', function(&$config) {
-            $config[\MapasCulturais\i::__('Roteiros')] = [
-                'range' => [80, 89],
-                'items' => [
-                    80 => ['name' => \MapasCulturais\i::__('Roteiro Cultural')],
-                    81 => ['name' => \MapasCulturais\i::__('Roteiro Ecológico')],
-                    82 => ['name' => \MapasCulturais\i::__('Roteiro Gastronômico')],
-                    83 => ['name' => \MapasCulturais\i::__('Roteiro Religioso')],
-                    84 => ['name' => \MapasCulturais\i::__('Roteiro de Aventura')],
-                    85 => ['name' => \MapasCulturais\i::__('Roteiro Rural')],
-                    86 => ['name' => \MapasCulturais\i::__('Roteiro Náutico')],
-                ]
-            ];
-        });
+        // Registrar taxonomia para Serviços Disponíveis  
+        $servicos_disponiveis = [
+            'Visita Guiada',
+            'Loja de Souvenirs',
+            'Alimentação no Local',
+            'Estacionamento',
+            'Acessibilidade',
+            'Wi-Fi Gratuito',
+            'Sanitários',
+            'Área de Descanso',
+            'Centro de Informações',
+            'Aluguel de Equipamentos'
+        ];
 
-        // Registrar taxonomias específicas do turismo
-        $app->hook('mapas.config(taxonomies)', function(&$config) {
-            // Taxonomias para Espaços (Atrativos)
-            $config['turismo_tipo_atrativo'] = [
-                'required' => true,
-                'entities' => ['space'],
-                'restrictToTypes' => ['space' => [80, 81, 82, 83, 84, 85, 86, 87]],
-                'terms' => [
-                    'atrativo-natural' => \MapasCulturais\i::__('Atrativo natural'),
-                    'atrativo-cultural-historico' => \MapasCulturais\i::__('Atrativo cultural/histórico'),
-                    'religioso-fe' => \MapasCulturais\i::__('Religioso / de fé'),
-                    'gastronomico' => \MapasCulturais\i::__('Gastronômico'),
-                    'rural-vivencia' => \MapasCulturais\i::__('Rural / de vivência'),
-                    'esporte-aventura' => \MapasCulturais\i::__('Esporte e aventura'),
-                    'cat' => \MapasCulturais\i::__('Centro de atendimento ao turista (CAT)'),
-                    'equipamento-de-apoio' => \MapasCulturais\i::__('Equipamento de apoio'),
-                ]
-            ];
+        $taxo_servicos = new \MapasCulturais\Definitions\Taxonomy(
+            102, 
+            'turismo_servicos', 
+            'Serviços Disponíveis', 
+            $servicos_disponiveis, 
+            false, 
+            false
+        );
+        $app->registerTaxonomy('MapasCulturais\Entities\Space', $taxo_servicos);
 
-            $config['turismo_segmento_turistico'] = [
-                'required' => true,
-                'entities' => ['space'],
-                'restrictToTypes' => ['space' => [80, 81, 82, 83, 84, 85, 86, 87]],
-                'terms' => [
-                    'turismo-cultural' => \MapasCulturais\i::__('Turismo cultural'),
-                    'ecoturismo' => \MapasCulturais\i::__('Ecoturismo'),
-                    'turismo-de-experiencia' => \MapasCulturais\i::__('Turismo de experiência'),
-                    'turismo-religioso' => \MapasCulturais\i::__('Turismo religioso'),
-                    'turismo-gastronomico' => \MapasCulturais\i::__('Turismo gastronômico'),
-                    'turismo-de-eventos' => \MapasCulturais\i::__('Turismo de eventos'),
-                    'turismo-nautico' => \MapasCulturais\i::__('Turismo náutico'),
-                    'turismo-rural' => \MapasCulturais\i::__('Turismo rural'),
-                ]
-            ];
-
-            $config['turismo_servicos_disponiveis'] = [
-                'required' => false,
-                'entities' => ['space'],
-                'restrictToTypes' => ['space' => [80, 81, 82, 83, 84, 85, 86, 87]],
-                'terms' => [
-                    'visita-guiada' => \MapasCulturais\i::__('Visita guiada'),
-                    'loja-souvenir' => \MapasCulturais\i::__('Loja / souvenir'),
-                    'alimentacao-no-local' => \MapasCulturais\i::__('Alimentação no local'),
-                    'estacionamento' => \MapasCulturais\i::__('Estacionamento'),
-                    'acessivel-pcd' => \MapasCulturais\i::__('Acessível PCD'),
-                    'banheiro' => \MapasCulturais\i::__('Banheiro público'),
-                    'area-para-fotos' => \MapasCulturais\i::__('Área para fotos'),
-                ]
-            ];
-
-            $config['turismo_publico_alvo'] = [
-                'required' => false,
-                'entities' => ['space'],
-                'restrictToTypes' => ['space' => [80, 81, 82, 83, 84, 85, 86, 87]],
-                'terms' => [
-                    'familias' => \MapasCulturais\i::__('Famílias'),
-                    'escolar' => \MapasCulturais\i::__('Escolares'),
-                    'melhor-idade' => \MapasCulturais\i::__('Melhor idade'),
-                    'jovem-aventura' => \MapasCulturais\i::__('Jovens / aventura'),
-                    'turista-internacional' => \MapasCulturais\i::__('Turista internacional'),
-                ]
-            ];
-
-            $config['turismo_acessibilidade'] = [
-                'required' => false,
-                'entities' => ['space'],
-                'restrictToTypes' => ['space' => [80, 81, 82, 83, 84, 85, 86, 87]],
-                'terms' => [
-                    'acesso-cadeira-de-rodas' => \MapasCulturais\i::__('Acesso para cadeira de rodas'),
-                    'audiodescricao' => \MapasCulturais\i::__('Audiodescrição'),
-                    'material-bilingue' => \MapasCulturais\i::__('Material bilíngue'),
-                    'piso-tatil' => \MapasCulturais\i::__('Piso tátil'),
-                ]
-            ];
-
-            // Taxonomias para Projetos (Roteiros)
-            $config['turismo_categoria_roteiro'] = [
-                'required' => true,
-                'entities' => ['project'],
-                'restrictToTypes' => ['project' => [80, 81, 82, 83, 84, 85, 86]],
-                'terms' => [
-                    'roteiro-cultural' => \MapasCulturais\i::__('Roteiro Cultural'),
-                    'roteiro-ecologico' => \MapasCulturais\i::__('Roteiro Ecológico'),
-                    'roteiro-gastronomico' => \MapasCulturais\i::__('Roteiro Gastronômico'),
-                    'roteiro-religioso' => \MapasCulturais\i::__('Roteiro Religioso'),
-                    'roteiro-aventura' => \MapasCulturais\i::__('Roteiro de Aventura'),
-                    'roteiro-rural' => \MapasCulturais\i::__('Roteiro Rural'),
-                    'roteiro-nautico' => \MapasCulturais\i::__('Roteiro Náutico'),
-                ]
-            ];
-
-            // Taxonomias para Eventos
-            $config['turismo_tipo_evento'] = [
-                'required' => false,
-                'entities' => ['event'],
-                'terms' => [
-                    'festival' => \MapasCulturais\i::__('Festival'),
-                    'feira-mostra' => \MapasCulturais\i::__('Feira / Mostra'),
-                    'evento-esportivo' => \MapasCulturais\i::__('Evento esportivo'),
-                    'cavalgada' => \MapasCulturais\i::__('Cavalgada / Cultural'),
-                    'religioso' => \MapasCulturais\i::__('Religioso / Romaria'),
-                    'gastronomico-evento' => \MapasCulturais\i::__('Gastronômico'),
-                ]
-            ];
-        });
-
-        // Registrar campos personalizados
+        // Registrar metadados específicos do turismo para Spaces
         $app->hook('entity(Space).meta', function(&$metadata) {
             $metadata['turismo_horario_funcionamento'] = [
                 'label' => \MapasCulturais\i::__('Horário de funcionamento'),
@@ -341,10 +317,23 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
             ];
         });
 
+        // Registrar metadados específicos do turismo para Projects
         $app->hook('entity(Project).meta', function(&$metadata) {
             $metadata['turismo_duracao_estimada'] = [
                 'label' => \MapasCulturais\i::__('Duração estimada'),
                 'type' => 'text',
+                'serialize' => function($value) { return $value; },
+                'unserialize' => function($value) { return $value; }
+            ];
+
+            $metadata['turismo_nivel_dificuldade'] = [
+                'label' => \MapasCulturais\i::__('Nível de dificuldade'),
+                'type' => 'select',
+                'options' => [
+                    'facil' => \MapasCulturais\i::__('Fácil'),
+                    'moderado' => \MapasCulturais\i::__('Moderado'),
+                    'dificil' => \MapasCulturais\i::__('Difícil'),
+                ],
                 'serialize' => function($value) { return $value; },
                 'unserialize' => function($value) { return $value; }
             ];
@@ -362,20 +351,6 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
                 'serialize' => function($value) { return $value; },
                 'unserialize' => function($value) { return $value; }
             ];
-
-            $metadata['turismo_melhor_epoca'] = [
-                'label' => \MapasCulturais\i::__('Melhor época de visita'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
-        });
-
-        // Ícone personalizado para o tema turismo
-        $app->hook("component(mc-icon).iconset", function(&$icon){
-            $icon['space'] = "material-symbols:location-on";
-            $icon['project'] = "material-symbols:route";
-            $icon['event'] = "material-symbols:event";
         });
     }
 

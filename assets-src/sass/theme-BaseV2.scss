@@ -17,6 +17,12 @@ $lightness-700: 25%;
 $primary-500: #4CAF50;    // Verde turismo/natureza
 $secondary-500: #FF9800;  // Laranja cultura/aventura
 
+// Required field styles
+.required {
+    color: $error;
+    font-weight: bold;
+}
+
 // Entities colors
 $opportunities-500: #2BA100;
 $events-500: #FF5722;     // Vermelho eventos turísticos

@@ -81,8 +81,7 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
             'En_Bairro',
             'En_Municipio', 
             'En_Estado',
-            'turismo_horario_funcionamento',
-            'turismo_contato'
+            'turismo_horario_funcionamento'
         ];
 
         // Campos obrigatórios para Roteiros Turísticos (Projects)
@@ -185,8 +184,6 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
 
         }, 1000);
 
-        parent::_init();
-
         // Validação de campos obrigatórios para Spaces
         $app->hook('GET(space.edit):before', function () use($self, $requiredSpaceFields) {
             $self->spaceRequiredProperties($requiredSpaceFields);
@@ -239,6 +236,82 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
                 }
             }
         });
+
+        parent::_init();
+    }
+
+    function register() {
+        parent::register();
+        $app = App::i();
+
+        // Registrar metadados com validações melhoradas
+        $metadata = [
+            'MapasCulturais\Entities\Space' => [
+                'turismo_horario_funcionamento' => [
+                    'label' => 'Horário de funcionamento',
+                    'type' => 'text',
+                    'placeholder' => 'Ex: Segunda a sexta das 8h às 17h, Sábados das 9h às 16h',
+                    'serialize' => function($value) { return $value; },
+                    'unserialize' => function($value) { return $value; }
+                ],
+                'turismo_valor_entrada' => [
+                    'label' => 'Valor de entrada',
+                    'type' => 'text', 
+                    'placeholder' => 'Ex: R$ 10,00 (inteira) / R$ 5,00 (meia) ou Gratuito',
+                    'serialize' => function($value) { return $value; },
+                    'unserialize' => function($value) { return $value; }
+                ]
+            ],
+            'MapasCulturais\Entities\Project' => [
+                'turismo_duracao_estimada' => [
+                    'label' => 'Duração estimada',
+                    'type' => 'text',
+                    'placeholder' => 'Ex: 2 horas, 1 dia, 3 dias/2 noites',
+                    'serialize' => function($value) { return $value; },
+                    'unserialize' => function($value) { return $value; }
+                ],
+                'turismo_nivel_dificuldade' => [
+                    'label' => 'Nível de dificuldade',
+                    'type' => 'select',
+                    'options' => [
+                        'facil' => 'Fácil',
+                        'moderado' => 'Moderado',
+                        'dificil' => 'Difícil',
+                    ],
+                    'serialize' => function($value) { return $value; },
+                    'unserialize' => function($value) { return $value; }
+                ],
+                'turismo_ponto_partida' => [
+                    'label' => 'Ponto de partida',
+                    'type' => 'text',
+                    'placeholder' => 'Ex: Centro de Atendimento ao Turista, Praça Central',
+                    'serialize' => function($value) { return $value; },
+                    'unserialize' => function($value) { return $value; }
+                ],
+                'turismo_ponto_chegada' => [
+                    'label' => 'Ponto de chegada',
+                    'type' => 'text',
+                    'placeholder' => 'Ex: Mirante do Morro, Museu da Cidade',
+                    'serialize' => function($value) { return $value; },
+                    'unserialize' => function($value) { return $value; }
+                ]
+            ]
+        ];
+
+        // Registrar metadados
+        foreach($metadata as $entity_class => $metas){
+            foreach($metas as $key => $cfg){
+                $def = new \MapasCulturais\Definitions\Metadata($key, $cfg);
+                $app->registerMetadata($def, $entity_class);
+            }
+        }
+
+        // Registrar taxonomias turísticas
+        $this->registerTourismTaxonomies();
+    }
+
+    private function registerTourismTaxonomies() {
+        $app = App::i();
 
         // Substituir a taxonomia "área de atuação" pelos segmentos turísticos
         $segmentos_turisticos = [
@@ -298,73 +371,101 @@ class Theme extends \MapasCulturais\Themes\BaseV2\Theme
             false
         );
         $app->registerTaxonomy('MapasCulturais\Entities\Space', $taxo_servicos);
+    }
 
-        // Registrar metadados específicos do turismo para Spaces
-        $app->hook('entity(Space).meta', function(&$metadata) {
-            $metadata['turismo_horario_funcionamento'] = [
-                'label' => \MapasCulturais\i::__('Horário de funcionamento'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
+    /**
+     * Retorna os filtros específicos para busca de atrativos e roteiros turísticos
+     */
+    protected function _getFilters()
+    {
+        $filters = parent::_getFilters();
+        $app = App::i();
 
-            $metadata['turismo_valor_entrada'] = [
-                'label' => \MapasCulturais\i::__('Valor de entrada'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
+        // Filtros para Espaços (Atrativos Turísticos)
+        $filters['space'] = [
+            [
+                'fieldType' => 'text',
+                'label' => 'Município',
+                'isArray' => false,
+                'placeholder' => 'Pesquisar por município',
+                'isInline' => false,
+                'filter' => [
+                    'param' => 'En_Municipio',
+                    'value' => 'ILIKE(*{val}*)'
+                ]
+            ],
+            [
+                'label' => 'Tipo de Atrativo',
+                'placeholder' => 'Selecione os tipos',
+                'filter' => [
+                    'param' => 'type',
+                    'value' => 'IN({val})'
+                ]
+            ],
+            [
+                'label' => 'Segmento Turístico',
+                'placeholder' => 'Selecione os segmentos',
+                'filter' => [
+                    'param' => 'area',
+                    'value' => 'IN({val})'
+                ]
+            ],
+            [
+                'label' => 'Serviços Disponíveis',
+                'placeholder' => 'Selecione os serviços',
+                'filter' => [
+                    'param' => 'turismo_servicos',
+                    'value' => 'IN({val})'
+                ]
+            ],
+            [
+                'fieldType' => 'text',
+                'label' => 'Horário de Funcionamento',
+                'isArray' => false,
+                'placeholder' => 'Ex: segunda a sexta',
+                'isInline' => false,
+                'filter' => [
+                    'param' => 'turismo_horario_funcionamento',
+                    'value' => 'ILIKE(*{val}*)'
+                ]
+            ]
+        ];
 
-            $metadata['turismo_contato'] = [
-                'label' => \MapasCulturais\i::__('Contato'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
+        // Filtros para Projetos (Roteiros Turísticos)
+        $filters['project'] = [
+            [
+                'fieldType' => 'text',
+                'label' => 'Ponto de Partida',
+                'isArray' => false,
+                'placeholder' => 'Pesquisar por ponto de partida',
+                'isInline' => false,
+                'filter' => [
+                    'param' => 'turismo_ponto_partida',
+                    'value' => 'ILIKE(*{val}*)'
+                ]
+            ],
+            [
+                'label' => 'Nível de Dificuldade',
+                'placeholder' => 'Selecione o nível',
+                'filter' => [
+                    'param' => 'turismo_nivel_dificuldade',
+                    'value' => 'IN({val})'
+                ]
+            ],
+            [
+                'fieldType' => 'text',
+                'label' => 'Duração',
+                'isArray' => false,
+                'placeholder' => 'Ex: 2 horas, 1 dia',
+                'isInline' => false,
+                'filter' => [
+                    'param' => 'turismo_duracao_estimada',
+                    'value' => 'ILIKE(*{val}*)'
+                ]
+            ]
+        ];
 
-            $metadata['turismo_observacoes'] = [
-                'label' => \MapasCulturais\i::__('Observações'),
-                'type' => 'longtext',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
-        });
-
-        // Registrar metadados específicos do turismo para Projects
-        $app->hook('entity(Project).meta', function(&$metadata) {
-            $metadata['turismo_duracao_estimada'] = [
-                'label' => \MapasCulturais\i::__('Duração estimada'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
-
-            $metadata['turismo_nivel_dificuldade'] = [
-                'label' => \MapasCulturais\i::__('Nível de dificuldade'),
-                'type' => 'select',
-                'options' => [
-                    'facil' => \MapasCulturais\i::__('Fácil'),
-                    'moderado' => \MapasCulturais\i::__('Moderado'),
-                    'dificil' => \MapasCulturais\i::__('Difícil'),
-                ],
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
-
-            $metadata['turismo_ponto_partida'] = [
-                'label' => \MapasCulturais\i::__('Ponto de partida'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
-
-            $metadata['turismo_ponto_chegada'] = [
-                'label' => \MapasCulturais\i::__('Ponto de chegada'),
-                'type' => 'text',
-                'serialize' => function($value) { return $value; },
-                'unserialize' => function($value) { return $value; }
-            ];
-        });
+        return $filters;
     }
 
     public function spaceRequiredProperties($requiredFields)

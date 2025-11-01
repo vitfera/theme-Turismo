@@ -3,13 +3,11 @@ $this->dict = [
     // Campos específicos do turismo - Atrativos (Spaces)
     'turismo_horario_funcionamento' => 'Horário de funcionamento',
     'turismo_valor_entrada' => 'Valor de entrada',
-    'turismo_contato' => 'Contato',
     'turismo_servicos_disponiveis' => 'Serviços disponíveis',
     'turismo_acessibilidade' => 'Acessibilidade',
     'turismo_tipo_atrativo' => 'Tipo de atrativo turístico',
     'turismo_segmento_turistico' => 'Segmento turístico',
     'turismo_publico_alvo' => 'Público-alvo',
-    'turismo_observacoes' => 'Observações',
     
     // Campos específicos do turismo - Roteiros (Projects)
     'turismo_duracao_estimada' => 'Duração estimada',
